@@ -1,4 +1,6 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config();
+
 import http from 'http';
 import app from './app.js';
 import { Server } from 'socket.io';
@@ -6,33 +8,41 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import projectModel from './models/project.model.js';
 import { generateResult } from './services/ai.service.js';
+import cors from 'cors'; // Import CORS
 
-const port = process.env.PORT || 3000;
 
+const port = process.env.PORT || 5000;
 
+// Set up Express to use CORS middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // Allow only your frontend to access the backend (adjust based on your frontend's URL)
+  credentials: true, // Allow credentials (cookies, authorization headers)
+}));
 
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*'
+        origin: 'http://localhost:5173', // Ensure Socket.IO allows connections from frontend
+        methods: ['GET', 'POST'], // Allow specific HTTP methods
+        credentials: true, // Enable credentials
     }
 });
 
-
 io.use(async (socket, next) => {
-
     try {
+       let token = socket.handshake.auth?.token;
 
-        const token = socket.handshake.auth?.token || socket.handshake.headers.authorization?.split(' ')[ 1 ];
+        if (!token && socket.handshake.headers.authorization?.startsWith('Bearer ')) {
+        token = socket.handshake.headers.authorization.split(' ')[1];
+        }
+
         const projectId = socket.handshake.query.projectId;
 
         if (!mongoose.Types.ObjectId.isValid(projectId)) {
             return next(new Error('Invalid projectId'));
         }
 
-
         socket.project = await projectModel.findById(projectId);
-
 
         if (!token) {
             return next(new Error('Authentication error'))
@@ -44,7 +54,6 @@ io.use(async (socket, next) => {
             return next(new Error('Authentication error'))
         }
 
-
         socket.user = decoded;
 
         next();
@@ -55,14 +64,10 @@ io.use(async (socket, next) => {
 
 })
 
-
 io.on('connection', socket => {
     socket.roomId = socket.project._id.toString()
 
-
     console.log('a user connected');
-
-
 
     socket.join(socket.roomId);
 
@@ -74,12 +79,8 @@ io.on('connection', socket => {
         socket.broadcast.to(socket.roomId).emit('project-message', data)
 
         if (aiIsPresentInMessage) {
-
-
             const prompt = message.replace('@ai', '');
-
             const result = await generateResult(prompt);
-
 
             io.to(socket.roomId).emit('project-message', {
                 message: result,
@@ -89,11 +90,8 @@ io.on('connection', socket => {
                 }
             })
 
-
             return
         }
-
-
     })
 
     socket.on('disconnect', () => {
@@ -102,9 +100,6 @@ io.on('connection', socket => {
     });
 });
 
-
-
-
 server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
-})
+});

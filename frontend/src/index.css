@@ -5,18 +5,133 @@
 * {
   margin: 0%;
   padding: 0%;
-  box-sizing: border-box;
+  box-sizing: border-box;  
 }
 
 html,
 body {
   height: 100%;
   width: 100%;
+  overflow: hidden; /* Add this to create a seamless experience */
+  background-color: white; /* A dark background to enhance the visuals */
+  font-family: 'Montserrat', sans-serif; /* Add a modern font */
 }
 
-.message-box{
+.message-box {
   scroll-behavior: smooth;
+  position: relative; /* Add this to enable absolute positioning */
+  width: 100%;
+  height: 100vh; /* Make the message box full-screen */
+  background-image: linear-gradient(to bottom, #3498db, #2ecc71); /* Add a gradient background */
+  background-size: 100% 300px; /* Make the gradient move */
+  animation: gradient-move 10s ease infinite; /* Animate the gradient */
+  border-radius: 20px; /* Add a rounded corner effect */
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Add a subtle shadow effect */
 }
-.message-box::-webkit-scrollbar{
+
+.message-box::-webkit-scrollbar {
   display: none;
+}
+
+/* Add some magic */
+.message-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("https://source.unsplash.com/1600x900/?water-droplets"); /* Add a water droplets background image */
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5; /* Make the image slightly transparent */
+  animation: water-ripple 5s ease infinite; /* Animate the water ripples */
+  filter: blur(2px); /* Add a subtle blur effect */
+}
+
+.message-box::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px; /* Create a wave-like effect at the bottom */
+  background-image: linear-gradient(to right, #3498db, #2ecc71); /* Match the gradient background */
+  background-size: 100% 50px; /* Make the wave move */
+  animation: wave-move 5s ease infinite; /* Animate the wave */
+  border-radius: 20px; /* Add a rounded corner effect */
+}
+
+/* Animations */
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes water-ripple {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes wave-move {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+/* Add some extra styles */
+.message-box h1 {
+  font-size: 48px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  margin-top: 20px;
+  animation: fade-in 2s ease-in-out;
+}
+
+.message-box p {
+  font-size: 18px;
+  color: #fff;
+  text-align: center;
+  margin-top: 20px;
+  animation: fade-in 2s ease-in-out;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Add some extra effects */
+.message-box:hover {
+  transform: scale(1.1);
+  transition: all 0.5s ease-in-out;
+}
+
+.message-box:hover::before {
+  opacity: 0.8;
+  transition: all 0.5s ease-in-out;
+}
+
+.message-box:hover::after {
+  height: 70px;
+  transition: all 0.5s ease-in-out;
 }
